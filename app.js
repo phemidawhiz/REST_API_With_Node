@@ -7,9 +7,10 @@ const mongoose = require('mongoose');
 const productRoutes = require('./api/routes/products');
 const orderRoutes = require('./api/routes/orders');
 
-mongoose.connect('mongodb+srv://ayodele:'+ process.env.MONGO_ATLAS_PW +'@cluster0-xl1ks.gcp.mongodb.net/test?retryWrites=true&w=majority', {
-    useMongoClient: true
-})
+
+mongoose.connect('mongodb+srv://'+ process.env.MONGO_ATLAS_USERNAME +':'+ process.env.MONGO_ATLAS_PW +'@cluster0-xl1ks.gcp.mongodb.net/test?retryWrites=true&w=majority',
+ { useNewUrlParser: true }
+ );
 
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({extended: false}));
