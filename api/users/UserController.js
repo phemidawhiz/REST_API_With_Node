@@ -14,18 +14,29 @@ module.exports = {
         const body = req.body;
         const salt = bcrypt.genSaltSync(10);
         body.password = bcrypt.hashSync(`${body.password}`, salt);
-        create(body, (err, results) => {
-            if (err) {
-                console.log(err);
-                return res.status(500).json({
+        getUserByEmail(body.email, (err, results) => {
+            if (err) return console.log(err);
+            if (!results) {
+                create(body, (err, results) => {
+                    if (err) {
+                        console.log(err);
+                        return res.status(500).json({
+                            success: 0,
+                            message: "Database connection error!"
+                        });
+                    }
+                    return res.status(200).json({
+                        success: 1,
+                        data: results
+                    });
+                });
+            } else {
+                return res.json({
                     success: 0,
-                    message: "Database connection error!"
+                    message: "Account with email already exist"
                 });
             }
-            return res.status(200).json({
-                success: 1,
-                data: results
-            });
+            
         });
     },
     getUserById: (req, res) => {
