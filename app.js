@@ -1,52 +1,27 @@
-const express = require('express');
+require("dotenv").config();
+const express = require("express");
+const bodyParser = require("body-parser");
 const app = express();
-const morgan = require('morgan');
-const bodyParser = require('body-parser');
-const mongoose = require('mongoose');
+const userRouter = require("./api/users/UserRouter");
+const itemRouter = require("./api/items/ItemRouter");
 
-const productRoutes = require('./api/routes/products');
-const orderRoutes = require('./api/routes/orders');
+app.use(function(req, res, next) {
 
-mongoose.connect('mongodb+srv://ayodele:'+ process.env.MONGO_ATLAS_PW +'@cluster0-xl1ks.gcp.mongodb.net/test?retryWrites=true&w=majority', {
-    useMongoClient: true
-})
+    res.header("Access-Control-Allow-Origin", "http://localhost:4200");
+  
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  
+    next();
+  
+  });
 
-app.use(morgan('dev'));
-app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-// Add headers to response and Handle CORS
-app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header(
-        "Access-Control-Allow-Headers", 
-        "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-    );
-    if(req.method === 'OPTIONS') {
-        res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, PATCH, DELETE');
-        return res.status(200).json({});
-    }
-    next();
+app.use("/api/users", userRouter);
+
+app.use("/api/items", itemRouter);
+
+app.listen(process.env.APP_PORT, () => {
+    console.log(`Server running on port ${process.env.APP_PORT}`);
 });
-
-// routes to handle requests
-app.use('/products', productRoutes);
-app.use('/orders', orderRoutes);
-
-//ERROR HANDLING
-app.use((req, res, next) => {
-    const error = new Error('Not found');
-    error.status = 404;
-    next(error);
-})
-
-app.use((error, req, res, next) => {
-    res.status(error.status || 500);
-    res.json({
-        error: {
-            message: error.message
-        }
-    })
-})
-
-module.exports = app;
